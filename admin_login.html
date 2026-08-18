@@ -84,10 +84,9 @@
         <button class="btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
         <div class="error-msg" id="loginError"></div>
         <div class="footer-note">
-            Belum punya akun admin? <a href="daftar_admin.html" class="register-link">Daftar di sini</a>
+            Belum punya akun admin? <a href="admin_daftar.html" class="register-link">Daftar di sini</a>
         </div>
     </div>
-
     <script>
         (function() {
             const loginUsername = document.getElementById('loginUsername');
@@ -96,7 +95,6 @@
             const loginError = document.getElementById('loginError');
             const STORAGE_KEY_ADMINS = 'admins';
 
-            // Jika sudah login, langsung ke dashboard
             if (localStorage.getItem('session_admin')) {
                 window.location.href = 'admin_dashboard.html';
                 return;
