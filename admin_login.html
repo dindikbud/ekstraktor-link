@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Admin · Ekstraktor Link</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --green-900: #0a2e0a; --green-800: #0f3f0f; --green-700: #155515;
+            --green-600: #1a6b1a; --green-500: #2a8a2a; --gold: #c9a84c;
+            --shadow-lg: 0 24px 64px rgba(10,46,10,0.18); --radius: 24px;
+            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f0f7f0, #dce8dc);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem;
+        }
+        .container {
+            max-width: 460px; width:100%;
+            background: rgba(255,255,255,0.70); backdrop-filter:blur(18px);
+            border-radius:var(--radius); padding:2.5rem 2rem;
+            box-shadow:var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.6);
+            border:1px solid rgba(255,255,255,0.5);
+        }
+        .brand { display:flex; align-items:center; gap:0.6rem; margin-bottom:1.5rem; }
+        .brand-icon {
+            width:44px; height:44px;
+            background: linear-gradient(135deg, var(--green-700), var(--green-500));
+            border-radius:14px; display:flex; align-items:center; justify-content:center;
+            color:#fff; font-size:1.3rem; box-shadow:0 4px 12px rgba(26,107,26,0.3);
+        }
+        .brand h1 { font-size:1.6rem; font-weight:800; color:var(--green-900); }
+        .brand h1 span { color:var(--gold); font-weight:300; }
+        h2 { color:var(--green-800); margin-bottom:0.5rem; font-size:1.3rem; }
+        .sub { color:var(--green-600); margin-bottom:1.8rem; font-size:0.9rem; }
+        .form-group { margin-bottom:1.2rem; }
+        .form-group label { display:block; font-weight:600; color:var(--green-800); font-size:0.85rem; margin-bottom:4px; }
+        .form-group input {
+            width:100%; padding:0.7rem 1rem; border:1.5px solid rgba(201,168,76,0.3);
+            border-radius:14px; font-size:0.95rem; background:rgba(255,255,255,0.7);
+            transition:var(--transition); outline:none; font-family:inherit;
+        }
+        .form-group input:focus { border-color:var(--gold); box-shadow:0 0 0 4px rgba(201,168,76,0.15); }
+        .btn-primary {
+            width:100%; padding:0.7rem; background:linear-gradient(135deg, var(--green-700), var(--green-500));
+            color:#fff; border:none; border-radius:40px; font-weight:700; font-size:0.95rem;
+            cursor:pointer; transition:var(--transition); box-shadow:0 4px 14px rgba(26,107,26,0.25);
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(26,107,26,0.3); }
+        .error-msg { color:#b33c3c; font-size:0.85rem; text-align:center; margin-top:0.5rem; display:none; }
+        .error-msg.show { display:block; }
+        .footer-note { margin-top:1.5rem; text-align:center; font-size:0.75rem; color:#6f8f6f; }
+        .register-link { color:var(--green-600); font-weight:600; text-decoration:none; }
+        .register-link:hover { color:var(--gold); }
+        .back-link { display:inline-block; margin-bottom:1.5rem; color:var(--green-700); font-weight:600; text-decoration:none; }
+        .back-link:hover { color:var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke User</a>
+        <div class="brand">
+            <div class="brand-icon"><i class="fas fa-paperclip"></i></div>
+            <h1>Ekstraktor <span>Link</span></h1>
+        </div>
+        <h2><i class="fas fa-sign-in-alt"></i> Login Admin</h2>
+        <p class="sub">Masuk untuk mengelola data</p>
+
+        <div class="form-group">
+            <label><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="loginUsername" placeholder="admin" />
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="loginPassword" placeholder="Masukkan password" />
+        </div>
+        <button class="btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+        <div class="error-msg" id="loginError"></div>
+        <div class="footer-note">
+            Belum punya akun admin? <a href="admin_daftar.html" class="register-link">Daftar di sini</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const loginUsername = document.getElementById('loginUsername');
+            const loginPassword = document.getElementById('loginPassword');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            const STORAGE_KEY_ADMINS = 'admins';
+
+            // Jika sudah login, langsung ke dashboard
+            if (localStorage.getItem('session_admin')) {
+                window.location.href = 'admin_dashboard.html';
+                return;
+            }
+
+            function getAdmins() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY_ADMINS)) || []; } catch(_){ return []; } }
+            function findAdmin(username) { return getAdmins().find(a => a.username === username); }
+
+            loginBtn.addEventListener('click', function() {
+                const username = loginUsername.value.trim();
+                const password = loginPassword.value.trim();
+                if (!username || !password) {
+                    loginError.textContent = 'Username dan password harus diisi.';
+                    loginError.classList.add('show');
+                    return;
+                }
+                const admin = findAdmin(username);
+                if (admin && admin.password === password) {
+                    localStorage.setItem('session_admin', JSON.stringify({ username, role: 'admin' }));
+                    window.location.href = 'admin_dashboard.html';
+                } else {
+                    loginError.textContent = '❌ Username atau password salah.';
+                    loginError.classList.add('show');
+                }
+            });
+
+            loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
+            loginUsername.addEventListener('keydown', e => { if (e.key === 'Enter') loginPassword.focus(); });
+        })();
+    </script>
+</body>
+</html>

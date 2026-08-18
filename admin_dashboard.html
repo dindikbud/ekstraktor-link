@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Admin · Ekstraktor Link</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --green-900: #0a2e0a; --green-800: #0f3f0f; --green-700: #155515;
+            --green-600: #1a6b1a; --green-500: #2a8a2a; --gold: #c9a84c;
+            --shadow-lg: 0 24px 64px rgba(10,46,10,0.18); --radius: 24px;
+            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f0f7f0, #dce8dc);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem;
+        }
+        .app-container {
+            width:100%; max-width:1200px;
+            background: rgba(255,255,255,0.70); backdrop-filter:blur(18px);
+            border-radius:var(--radius); padding:2rem; box-shadow:var(--shadow-lg);
+            border:1px solid rgba(255,255,255,0.5);
+        }
+        .header {
+            display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+            margin-bottom:1.8rem; padding-bottom:0.8rem;
+            border-bottom:2px solid rgba(201,168,76,0.25); gap:1rem;
+        }
+        .brand { display:flex; align-items:center; gap:0.6rem; }
+        .brand-icon {
+            width:44px; height:44px;
+            background: linear-gradient(135deg, var(--green-700), var(--green-500));
+            border-radius:14px; display:flex; align-items:center; justify-content:center;
+            color:#fff; font-size:1.3rem; box-shadow:0 4px 12px rgba(26,107,26,0.3);
+        }
+        .brand h1 { font-size:1.6rem; font-weight:800; color:var(--green-900); }
+        .brand h1 span { color:var(--gold); font-weight:300; }
+        .badge-role {
+            font-size:0.65rem; font-weight:600; text-transform:uppercase;
+            background:var(--gold); color:#fff; padding:0.15rem 0.9rem;
+            border-radius:40px; margin-left:0.4rem; box-shadow:0 2px 8px rgba(201,168,76,0.3);
+        }
+        .user-info {
+            display:flex; align-items:center; gap:1rem;
+            background:rgba(255,255,255,0.5); padding:0.4rem 0.4rem 0.4rem 1.2rem;
+            border-radius:60px; border:1px solid rgba(201,168,76,0.2); backdrop-filter:blur(4px);
+        }
+        .avatar {
+            width:34px; height:34px; border-radius:50%;
+            background:linear-gradient(135deg, var(--green-600), var(--gold));
+            display:flex; align-items:center; justify-content:center; color:#fff;
+            font-weight:700; font-size:0.85rem; box-shadow:0 2px 8px rgba(26,107,26,0.2);
+        }
+        .username-label { font-weight:600; color:var(--green-800); font-size:0.9rem; }
+        .btn-logout {
+            background:rgba(179,60,60,0.1); border:1px solid rgba(179,60,60,0.2);
+            color:#b33c3c; padding:0.3rem 1.2rem; border-radius:40px; font-weight:600;
+            font-size:0.75rem; cursor:pointer; transition:var(--transition);
+            display:flex; align-items:center; gap:6px;
+        }
+        .btn-logout:hover { background:#b33c3c; color:#fff; border-color:#b33c3c; }
+
+        .admin-panel {
+            background:rgba(255,255,255,0.4); backdrop-filter:blur(4px);
+            border-radius:18px; padding:1.2rem 1.5rem; margin-bottom:1.8rem;
+            border:1px solid rgba(201,168,76,0.15);
+        }
+        .admin-panel h2 { font-size:1.1rem; color:var(--green-800); margin-bottom:0.8rem; display:flex; align-items:center; gap:8px; }
+        .admin-panel h2 i { color:var(--gold); }
+        .form-row { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:flex-end; }
+        .form-group { flex:1 1 180px; display:flex; flex-direction:column; gap:3px; }
+        .form-group label {
+            font-size:0.7rem; font-weight:600; color:var(--green-700); text-transform:uppercase;
+            letter-spacing:0.3px; display:flex; align-items:center; gap:6px;
+        }
+        .form-group label .paste-btn {
+            background:rgba(201,168,76,0.15); border:none; border-radius:30px;
+            padding:0.05rem 0.6rem; font-size:0.6rem; font-weight:700; color:var(--green-700);
+            cursor:pointer; transition:var(--transition); display:inline-flex;
+            align-items:center; gap:3px; text-transform:none; font-family:inherit;
+        }
+        .form-group label .paste-btn:hover { background:rgba(201,168,76,0.3); }
+        .form-group input {
+            padding:0.6rem 0.9rem; border:1.5px solid rgba(201,168,76,0.2);
+            border-radius:12px; font-size:0.9rem; background:rgba(255,255,255,0.6);
+            transition:var(--transition); outline:none; font-family:inherit;
+        }
+        .form-group input:focus { border-color:var(--gold); box-shadow:0 0 0 4px rgba(201,168,76,0.1); }
+        .btn-add {
+            background:linear-gradient(135deg, var(--green-700), var(--green-500));
+            color:white; border:none; padding:0.6rem 2rem; border-radius:40px;
+            font-weight:700; font-size:0.9rem; cursor:pointer; transition:var(--transition);
+            box-shadow:0 4px 14px rgba(26,107,26,0.2); align-self:flex-end;
+            white-space:nowrap; display:flex; align-items:center; gap:6px;
+        }
+        .btn-add:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(26,107,26,0.3); }
+        .btn-danger-sm {
+            background:rgba(179,60,60,0.1); border:1px solid rgba(179,60,60,0.2);
+            color:#b33c3c; padding:0.3rem 1rem; border-radius:30px;
+            font-weight:600; font-size:0.75rem; cursor:pointer; transition:var(--transition);
+            display:inline-flex; align-items:center; gap:4px; font-family:inherit;
+        }
+        .btn-danger-sm:hover { background:#b33c3c; color:#fff; border-color:#b33c3c; }
+        .btn-backup, .btn-export, .btn-import {
+            padding:0.3rem 1rem; border-radius:30px; font-weight:600; font-size:0.75rem;
+            cursor:pointer; transition:var(--transition); display:inline-flex; align-items:center; gap:6px;
+            font-family:inherit; border:1px solid transparent;
+        }
+        .btn-backup {
+            background:rgba(201,168,76,0.15); border-color:rgba(201,168,76,0.3); color:var(--green-700);
+        }
+        .btn-backup:hover { background:var(--gold); color:#fff; border-color:var(--gold); transform:translateY(-2px); }
+        .btn-export {
+            background:rgba(26,107,26,0.1); border-color:rgba(26,107,26,0.2); color:var(--green-700);
+        }
+        .btn-export:hover { background:var(--green-600); color:#fff; border-color:var(--green-600); transform:translateY(-2px); }
+        .btn-import {
+            background:rgba(52,73,94,0.1); border-color:rgba(52,73,94,0.2); color:#2c3e50;
+        }
+        .btn-import:hover { background:#2c3e50; color:#fff; border-color:#2c3e50; transform:translateY(-2px); }
+        .admin-actions {
+            display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center; margin-top:0.6rem;
+        }
+        #fileImport { display:none; }
+
+        .toolbar {
+            display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+            gap:1rem; margin:0.5rem 0 1rem;
+        }
+        .search-box {
+            display:flex; align-items:center; background:rgba(255,255,255,0.5);
+            border-radius:60px; padding:0.1rem 0.1rem 0.1rem 1.2rem;
+            border:1.5px solid rgba(201,168,76,0.2); flex:1 1 250px; max-width:400px;
+            backdrop-filter:blur(4px);
+        }
+        .search-box input {
+            border:none; background:transparent; padding:0.5rem 0.2rem; font-size:0.9rem;
+            width:100%; outline:none; color:var(--green-900); font-family:inherit;
+        }
+        .search-box input::placeholder { color:#8aaa8a; }
+        .search-box button {
+            background:var(--green-600); border:none; color:white; padding:0.4rem 1.2rem;
+            border-radius:40px; font-weight:600; font-size:0.8rem; cursor:pointer;
+            transition:var(--transition);
+        }
+        .search-box button:hover { background:var(--green-500); }
+        .badge-counter {
+            background:rgba(255,255,255,0.6); backdrop-filter:blur(4px);
+            padding:0.3rem 1.2rem; border-radius:60px; font-size:0.8rem; font-weight:600;
+            color:var(--green-800); border:1px solid rgba(201,168,76,0.2); white-space:nowrap;
+        }
+
+        .table-wrapper {
+            overflow-x:auto; border-radius:18px;
+            border:1px solid rgba(201,168,76,0.15);
+            background:rgba(255,255,255,0.4); backdrop-filter:blur(4px); margin-top:0.2rem;
+        }
+        table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+        th {
+            background:rgba(201,168,76,0.08); color:var(--green-800); font-weight:700;
+            padding:0.8rem 1rem; text-align:left; border-bottom:2px solid rgba(201,168,76,0.15);
+        }
+        td {
+            padding:0.7rem 1rem; border-bottom:1px solid rgba(201,168,76,0.08);
+            vertical-align:middle; word-break:break-word;
+        }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(201,168,76,0.04); }
+        .link-cell a {
+            color:var(--green-700); text-decoration:none; font-weight:500;
+            border-bottom:1px dashed rgba(201,168,76,0.4); word-break:break-all;
+        }
+        .link-cell a:hover { color:var(--green-900); border-bottom:1px solid var(--gold); }
+        .empty-row td { text-align:center; color:#7a9a7a; padding:2.5rem 1rem; font-style:italic; }
+        .action-cell { display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; }
+        .copy-btn {
+            background:transparent; border:1px solid rgba(201,168,76,0.3); border-radius:30px;
+            padding:0.2rem 0.8rem; font-size:0.7rem; font-weight:600; color:var(--green-700);
+            cursor:pointer; transition:var(--transition); display:inline-flex; align-items:center; gap:4px;
+            white-space:nowrap; font-family:inherit;
+        }
+        .copy-btn:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); }
+        .copy-btn.copied { background:var(--green-600); color:white; border-color:var(--green-600); }
+        .delete-btn {
+            background:transparent; border:none; color:#b33c3c; font-size:1rem;
+            cursor:pointer; padding:0 0.2rem; transition:var(--transition); font-weight:700;
+        }
+        .delete-btn:hover { color:#7a1f1f; transform:scale(1.1); }
+
+        .toast {
+            position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
+            background:var(--green-800); color:#fff; padding:0.7rem 2rem; border-radius:60px;
+            font-weight:500; font-size:0.9rem; box-shadow:0 8px 32px rgba(10,46,10,0.2);
+            opacity:0; transition:opacity 0.3s, transform 0.3s; pointer-events:none;
+            z-index:999; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1);
+        }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        .footer-note {
+            margin-top:1.2rem; text-align:right; font-size:0.75rem; color:#6f8f6f;
+            border-top:1px solid rgba(201,168,76,0.15); padding-top:0.8rem;
+        }
+        @media (max-width:700px) {
+            .app-container { padding:1rem; }
+            .header { flex-direction:column; align-items:stretch; gap:0.8rem; }
+            .brand h1 { font-size:1.2rem; }
+            .admin-panel .form-row { flex-direction:column; }
+            .admin-panel .btn-add { align-self:stretch; justify-content:center; }
+            .toolbar { flex-direction:column; align-items:stretch; }
+            .search-box { max-width:100%; }
+            th, td { padding:0.5rem 0.6rem; font-size:0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-paperclip"></i></div>
+                <h1>Ekstraktor <span>Link</span></h1>
+                <span class="badge-role">Admin</span>
+            </div>
+            <div class="user-info" id="userInfo">
+                <div class="avatar" id="avatarLetter">A</div>
+                <span class="username-label" id="usernameDisplay">admin</span>
+                <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div class="admin-panel">
+            <h2><i class="fas fa-pen-fancy"></i> Input Data Baru</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Tanggal</label>
+                    <input type="date" id="inputTanggal" />
+                </div>
+                <div class="form-group">
+                    <label>
+                        📝 Nama Pekerjaan
+                        <button class="paste-btn" id="pastePekerjaan"><i class="fas fa-paste"></i> Paste</button>
+                    </label>
+                    <input type="text" id="inputPekerjaan" placeholder="Contoh: Berita Acara" />
+                </div>
+                <div class="form-group">
+                    <label>
+                        🔗 Link
+                        <button class="paste-btn" id="pasteLink"><i class="fas fa-paste"></i> Paste</button>
+                    </label>
+                    <input type="url" id="inputLink" placeholder="https://drive.google.com/..." />
+                </div>
+                <button class="btn-add" id="btnTambah"><i class="fas fa-plus-circle"></i> Tambah</button>
+            </div>
+            <div class="admin-actions">
+                <span style="font-size:0.75rem; color:var(--green-700);"><i class="fas fa-database"></i> Data tersimpan di browser Anda.</span>
+                <button class="btn-danger-sm" id="btnHapusSemua"><i class="fas fa-trash-alt"></i> Hapus Semua</button>
+                <button class="btn-backup" id="btnBackupPDF"><i class="fas fa-file-pdf"></i> Backup PDF</button>
+                <button class="btn-export" id="btnExportJSON"><i class="fas fa-download"></i> Ekspor JSON</button>
+                <button class="btn-import" id="btnImportJSON"><i class="fas fa-upload"></i> Impor JSON</button>
+                <input type="file" id="fileImport" accept=".json" />
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Cari pekerjaan atau link..." />
+                <button id="btnSearchReset"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="badge-counter" id="counterBadge">0 item</span>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:12%;">Tanggal</th>
+                        <th style="width:35%;">Nama Pekerjaan</th>
+                        <th style="width:35%;">Link</th>
+                        <th style="width:18%; text-align:center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        <div class="footer-note">
+            <i class="fas fa-bolt"></i> Ekstraktor Link E-Kinerja &bull; Data lokal
+        </div>
+    </div>
+
+    <div id="toast" class="toast">✅ Disalin!</div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ===== CEK SESSION =====
+            const session = localStorage.getItem('session_admin');
+            if (!session) {
+                window.location.href = 'admin_login.html';
+                return;
+            }
+            let currentUser;
+            try { currentUser = JSON.parse(session); if (currentUser.role !== 'admin') throw 'bukan admin'; } catch(e) {
+                localStorage.removeItem('session_admin');
+                window.location.href = 'admin_login.html';
+                return;
+            }
+
+            // ===== DOM REFS =====
+            const usernameDisplay = document.getElementById('usernameDisplay');
+            const avatarLetter = document.getElementById('avatarLetter');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const searchInput = document.getElementById('searchInput');
+            const btnSearchReset = document.getElementById('btnSearchReset');
+            const counterBadge = document.getElementById('counterBadge');
+            const tableBody = document.getElementById('tableBody');
+            const toast = document.getElementById('toast');
+            let toastTimeout = null;
+
+            usernameDisplay.textContent = currentUser.username;
+            avatarLetter.textContent = currentUser.username.charAt(0).toUpperCase();
+
+            const inputTanggal = document.getElementById('inputTanggal');
+            const inputPekerjaan = document.getElementById('inputPekerjaan');
+            const inputLink = document.getElementById('inputLink');
+            const btnTambah = document.getElementById('btnTambah');
+            const btnHapusSemua = document.getElementById('btnHapusSemua');
+            const btnBackupPDF = document.getElementById('btnBackupPDF');
+            const btnExportJSON = document.getElementById('btnExportJSON');
+            const btnImportJSON = document.getElementById('btnImportJSON');
+            const fileImport = document.getElementById('fileImport');
+            const pastePekerjaan = document.getElementById('pastePekerjaan');
+            const pasteLink = document.getElementById('pasteLink');
+
+            // ===== STATE =====
+            let dataItems = [];
+            let filteredItems = [];
+            let searchQuery = '';
+            const STORAGE_KEY_DATA = 'ekstraktor_data_ekinerja';
+
+            // ===== FUNGSI DATA =====
+            function loadData() {
+                const stored = localStorage.getItem(STORAGE_KEY_DATA);
+                if (stored) {
+                    try { dataItems = JSON.parse(stored); if (!Array.isArray(dataItems)) dataItems = []; } catch(_){ dataItems = []; }
+                } else {
+                    dataItems = [];
+                    // Data contoh
+                    const sample = [
+                        { tanggal: '2026-08-10', pekerjaan: 'Berita Acara Evaluasi Pelayanan', link: 'https://drive.google.com/file/d/1abc123/view' },
+                        { tanggal: '2026-08-12', pekerjaan: 'Daftar Hadir Rapat Koordinasi', link: 'https://drive.google.com/file/d/1xyz789/view' },
+                        { tanggal: '2026-08-13', pekerjaan: 'Dokumentasi Kegiatan Fasilitasi', link: 'https://drive.google.com/file/d/1def456/view' }
+                    ];
+                    localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(sample));
+                    dataItems = sample;
+                }
+                applySearch();
+                renderTable();
+                updateCounter();
+            }
+
+            function saveData() {
+                localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(dataItems));
+                applySearch();
+                renderTable();
+                updateCounter();
+            }
+
+            function applySearch() {
+                const q = searchQuery.trim().toLowerCase();
+                if (!q) filteredItems = [...dataItems];
+                else filteredItems = dataItems.filter(item =>
+                    (item.pekerjaan || '').toLowerCase().includes(q) ||
+                    (item.link || '').toLowerCase().includes(q)
+                );
+            }
+
+            function updateCounter() {
+                counterBadge.textContent = `${filteredItems.length} / ${dataItems.length} item`;
+            }
+
+            function renderTable() {
+                if (filteredItems.length === 0) {
+                    tableBody.innerHTML = `<tr class="empty-row"><td colspan="4">📭 ${dataItems.length === 0 ? 'Belum ada data.' : 'Tidak ada data yang cocok.'}</td></tr>`;
+                    return;
+                }
+                let html = '';
+                filteredItems.forEach((item, index) => {
+                    const originalIndex = dataItems.indexOf(item);
+                    const tanggal = item.tanggal || '-';
+                    let displayTanggal = tanggal;
+                    if (tanggal && tanggal.length === 10) {
+                        const parts = tanggal.split('-');
+                        if (parts.length === 3) displayTanggal = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                    const pekerjaan = item.pekerjaan || '(tanpa judul)';
+                    const link = item.link || '#';
+                    html += `
+                        <tr>
+                            <td><strong>${displayTanggal}</strong></td>
+                            <td>${pekerjaan}</td>
+                            <td class="link-cell"><a href="${link}" target="_blank">${link.length > 55 ? link.substring(0,55)+'…' : link}</a></td>
+                            <td style="text-align:center;">
+                                <div class="action-cell">
+                                    <button class="copy-btn" data-copy="${pekerjaan}"><i class="far fa-copy"></i> Nama</button>
+                                    <button class="copy-btn" data-copy="${link}"><i class="fas fa-link"></i> Link</button>
+                                    <button class="delete-btn" data-original-index="${originalIndex}" title="Hapus"><i class="fas fa-times-circle"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableBody.innerHTML = html;
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const text = this.getAttribute('data-copy');
+                        if (text) copyToClipboard(text, this);
+                    });
+                });
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-original-index'), 10);
+                        if (!isNaN(index) && confirm('Hapus data ini?')) {
+                            dataItems.splice(index, 1);
+                            saveData();
+                        }
+                    });
+                });
+            }
+
+            // ===== COPY & TOAST =====
+            function copyToClipboard(text, btn) {
+                if (!text) return;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('✅ "' + (text.length > 30 ? text.substring(0,30)+'…' : text) + '" disalin!');
+                    if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
+                }).catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    showToast('✅ Disalin! (fallback)');
+                    if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
+                });
+            }
+
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+
+            // ===== PASTE =====
+            function pasteFromClipboard(target) {
+                if (!navigator.clipboard) { showToast('❌ Clipboard tidak didukung.'); return; }
+                navigator.clipboard.readText().then(text => {
+                    if (text) { target.value = text; showToast('✅ Data ditempelkan.'); target.focus(); }
+                    else showToast('⚠️ Clipboard kosong.');
+                }).catch(() => showToast('❌ Gagal membaca clipboard.'));
+            }
+            pastePekerjaan.addEventListener('click', e => { e.stopPropagation(); pasteFromClipboard(inputPekerjaan); });
+            pasteLink.addEventListener('click', e => { e.stopPropagation(); pasteFromClipboard(inputLink); });
+
+            // ===== ADMIN ACTIONS =====
+            function tambahData() {
+                const tanggal = inputTanggal.value.trim();
+                const pekerjaan = inputPekerjaan.value.trim();
+                const link = inputLink.value.trim();
+                if (!tanggal) { alert('📅 Tanggal harus diisi.'); inputTanggal.focus(); return; }
+                if (!pekerjaan) { alert('📝 Nama pekerjaan harus diisi.'); inputPekerjaan.focus(); return; }
+                if (!link) { alert('🔗 Link harus diisi.'); inputLink.focus(); return; }
+                if (!link.startsWith('http://') && !link.startsWith('https://')) { alert('🔗 Link harus diawali http:// atau https://'); inputLink.focus(); return; }
+                dataItems.push({ tanggal, pekerjaan, link });
+                saveData();
+                inputTanggal.value = '';
+                inputPekerjaan.value = '';
+                inputLink.value = '';
+                inputTanggal.focus();
+                const btn = btnTambah;
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Tersimpan!';
+                setTimeout(() => btn.innerHTML = original, 1200);
+            }
+
+            function hapusSemua() {
+                if (dataItems.length === 0) { alert('Tidak ada data.'); return; }
+                if (confirm('⚠️ Hapus SEMUA data? Tindakan ini tidak dapat dibatalkan.')) {
+                    dataItems = [];
+                    saveData();
+                }
+            }
+
+            // ===== BACKUP PDF =====
+            function exportToPDF() {
+                if (dataItems.length === 0) {
+                    alert('Tidak ada data untuk di-backup.');
+                    return;
+                }
+                const sorted = [...dataItems].sort((a, b) => (a.tanggal || '').localeCompare(b.tanggal || ''));
+                const tableData = sorted.map(item => {
+                    const tanggal = item.tanggal || '-';
+                    let displayTanggal = tanggal;
+                    if (tanggal && tanggal.length === 10) {
+                        const parts = tanggal.split('-');
+                        if (parts.length === 3) displayTanggal = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                    return [displayTanggal, item.pekerjaan || '(tanpa judul)', item.link || '#'];
+                });
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                doc.setFontSize(18);
+                doc.setTextColor(10, 46, 10);
+                doc.text('Ekstraktor Link E-Kinerja', 14, 22);
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text('Data Backup - ' + new Date().toLocaleString('id-ID'), 14, 30);
+                doc.setLineWidth(0.5);
+                doc.line(14, 34, 196, 34);
+                doc.autoTable({
+                    head: [['Tanggal', 'Nama Pekerjaan', 'Link']],
+                    body: tableData,
+                    startY: 40,
+                    styles: { fontSize: 8, cellPadding: 3, lineColor: [200, 200, 200], lineWidth: 0.1 },
+                    headStyles: { fillColor: [201, 168, 76], textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+                    columnStyles: { 0: { cellWidth: 25, halign: 'center' }, 1: { cellWidth: 70 }, 2: { cellWidth: 'auto' } },
+                    margin: { left: 14, right: 14 },
+                    didParseCell: function(data) {
+                        if (data.section === 'body') {
+                            data.cell.styles.fillColor = data.row.index % 2 === 0 ? [245, 245, 245] : [255, 255, 255];
+                        }
+                    }
+                });
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(7);
+                    doc.setTextColor(150);
+                    doc.text(
+                        `Halaman ${i} dari ${pageCount} · Diekspor pada ${new Date().toLocaleString('id-ID')}`,
+                        14,
+                        doc.internal.pageSize.height - 10
+                    );
+                }
+                doc.save('backup_data_ekinerja.pdf');
+                showToast('✅ Backup PDF berhasil diunduh!');
+            }
+
+            // ===== EKSPOR JSON =====
+            function exportJSON() {
+                if (dataItems.length === 0) {
+                    alert('Tidak ada data untuk diekspor.');
+                    return;
+                }
+                const json = JSON.stringify(dataItems, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'data_ekinerja_backup.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('✅ File JSON berhasil diunduh!');
+            }
+
+            // ===== IMPOR JSON =====
+            function importJSON(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (!Array.isArray(imported)) throw new Error('Format tidak valid');
+                        if (imported.length === 0) {
+                            alert('File kosong. Tidak ada data untuk diimpor.');
+                            return;
+                        }
+                        const valid = imported.every(item => item.tanggal && item.pekerjaan && item.link);
+                        if (!valid) {
+                            alert('Format data tidak valid. Pastikan setiap item memiliki tanggal, pekerjaan, dan link.');
+                            return;
+                        }
+                        if (confirm(`Akan mengimpor ${imported.length} data. Data saat ini akan diganti. Lanjutkan?`)) {
+                            dataItems = imported;
+                            saveData();
+                            showToast(`✅ ${dataItems.length} data berhasil diimpor!`);
+                        }
+                    } catch (err) {
+                        alert('Gagal membaca file. Pastikan file berisi data JSON yang valid.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            btnTambah.addEventListener('click', tambahData);
+            btnHapusSemua.addEventListener('click', hapusSemua);
+            btnBackupPDF.addEventListener('click', exportToPDF);
+            btnExportJSON.addEventListener('click', exportJSON);
+            btnImportJSON.addEventListener('click', function() {
+                fileImport.click();
+            });
+            fileImport.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    importJSON(e.target.files[0]);
+                    e.target.value = '';
+                }
+            });
+
+            // ===== SEARCH =====
+            function handleSearch() {
+                searchQuery = searchInput.value;
+                applySearch();
+                renderTable();
+                updateCounter();
+                btnSearchReset.style.display = searchQuery ? 'inline-block' : 'none';
+            }
+
+            function resetSearch() {
+                searchInput.value = '';
+                searchQuery = '';
+                applySearch();
+                renderTable();
+                updateCounter();
+                btnSearchReset.style.display = 'none';
+                searchInput.focus();
+            }
+
+            searchInput.addEventListener('input', handleSearch);
+            btnSearchReset.addEventListener('click', resetSearch);
+            btnSearchReset.style.display = 'none';
+
+            // ===== LOGOUT =====
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('session_admin');
+                window.location.href = 'admin_login.html';
+            });
+
+            // ===== INIT =====
+            const today = new Date().toISOString().split('T')[0];
+            inputTanggal.value = today;
+            loadData();
+        })();
+    </script>
+</body>
+</html>

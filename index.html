@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ekstraktor Link · User</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --green-900: #0a2e0a; --green-800: #0f3f0f; --green-700: #155515;
+            --green-600: #1a6b1a; --green-500: #2a8a2a; --gold: #c9a84c;
+            --shadow-lg: 0 24px 64px rgba(10,46,10,0.18); --radius: 24px;
+            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f0f7f0, #dce8dc);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem;
+        }
+        .app-container {
+            width:100%; max-width:1200px;
+            background: rgba(255,255,255,0.70); backdrop-filter:blur(18px);
+            border-radius:var(--radius); padding:2rem; box-shadow:var(--shadow-lg);
+            border:1px solid rgba(255,255,255,0.5);
+        }
+        .header {
+            display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+            margin-bottom:1.8rem; padding-bottom:0.8rem;
+            border-bottom:2px solid rgba(201,168,76,0.25); gap:1rem;
+        }
+        .brand { display:flex; align-items:center; gap:0.6rem; }
+        .brand-icon {
+            width:44px; height:44px;
+            background: linear-gradient(135deg, var(--green-700), var(--green-500));
+            border-radius:14px; display:flex; align-items:center; justify-content:center;
+            color:#fff; font-size:1.3rem; box-shadow:0 4px 12px rgba(26,107,26,0.3);
+        }
+        .brand h1 { font-size:1.6rem; font-weight:800; color:var(--green-900); }
+        .brand h1 span { color:var(--gold); font-weight:300; }
+        .badge-role {
+            font-size:0.65rem; font-weight:600; text-transform:uppercase;
+            background:var(--gold); color:#fff; padding:0.15rem 0.9rem;
+            border-radius:40px; margin-left:0.4rem; box-shadow:0 2px 8px rgba(201,168,76,0.3);
+        }
+        .admin-link { color:var(--green-600); text-decoration:none; font-weight:600; }
+        .admin-link:hover { color:var(--gold); }
+        .toolbar {
+            display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+            gap:1rem; margin:0.5rem 0 1rem;
+        }
+        .search-box {
+            display:flex; align-items:center; background:rgba(255,255,255,0.5);
+            border-radius:60px; padding:0.1rem 0.1rem 0.1rem 1.2rem;
+            border:1.5px solid rgba(201,168,76,0.2); flex:1 1 250px; max-width:400px;
+            backdrop-filter:blur(4px);
+        }
+        .search-box input {
+            border:none; background:transparent; padding:0.5rem 0.2rem; font-size:0.9rem;
+            width:100%; outline:none; color:var(--green-900); font-family:inherit;
+        }
+        .search-box input::placeholder { color:#8aaa8a; }
+        .search-box button {
+            background:var(--green-600); border:none; color:white; padding:0.4rem 1.2rem;
+            border-radius:40px; font-weight:600; font-size:0.8rem; cursor:pointer;
+            transition:var(--transition);
+        }
+        .search-box button:hover { background:var(--green-500); }
+        .badge-counter {
+            background:rgba(255,255,255,0.6); backdrop-filter:blur(4px);
+            padding:0.3rem 1.2rem; border-radius:60px; font-size:0.8rem; font-weight:600;
+            color:var(--green-800); border:1px solid rgba(201,168,76,0.2); white-space:nowrap;
+        }
+        .table-wrapper {
+            overflow-x:auto; border-radius:18px;
+            border:1px solid rgba(201,168,76,0.15);
+            background:rgba(255,255,255,0.4); backdrop-filter:blur(4px); margin-top:0.2rem;
+        }
+        table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+        th {
+            background:rgba(201,168,76,0.08); color:var(--green-800); font-weight:700;
+            padding:0.8rem 1rem; text-align:left; border-bottom:2px solid rgba(201,168,76,0.15);
+        }
+        td {
+            padding:0.7rem 1rem; border-bottom:1px solid rgba(201,168,76,0.08);
+            vertical-align:middle; word-break:break-word;
+        }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(201,168,76,0.04); }
+        .link-cell a {
+            color:var(--green-700); text-decoration:none; font-weight:500;
+            border-bottom:1px dashed rgba(201,168,76,0.4); word-break:break-all;
+        }
+        .link-cell a:hover { color:var(--green-900); border-bottom:1px solid var(--gold); }
+        .empty-row td { text-align:center; color:#7a9a7a; padding:2.5rem 1rem; font-style:italic; }
+        .action-cell { display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; }
+        .copy-btn {
+            background:transparent; border:1px solid rgba(201,168,76,0.3); border-radius:30px;
+            padding:0.2rem 0.8rem; font-size:0.7rem; font-weight:600; color:var(--green-700);
+            cursor:pointer; transition:var(--transition); display:inline-flex; align-items:center; gap:4px;
+            white-space:nowrap; font-family:inherit;
+        }
+        .copy-btn:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); }
+        .copy-btn.copied { background:var(--green-600); color:white; border-color:var(--green-600); }
+        .toast {
+            position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
+            background:var(--green-800); color:#fff; padding:0.7rem 2rem; border-radius:60px;
+            font-weight:500; font-size:0.9rem; box-shadow:0 8px 32px rgba(10,46,10,0.2);
+            opacity:0; transition:opacity 0.3s, transform 0.3s; pointer-events:none;
+            z-index:999; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1);
+        }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        .footer-note {
+            margin-top:1.2rem; text-align:right; font-size:0.75rem; color:#6f8f6f;
+            border-top:1px solid rgba(201,168,76,0.15); padding-top:0.8rem;
+        }
+        @media (max-width:700px) {
+            .app-container { padding:1rem; }
+            .header { flex-direction:column; align-items:stretch; gap:0.8rem; }
+            .brand h1 { font-size:1.2rem; }
+            .toolbar { flex-direction:column; align-items:stretch; }
+            .search-box { max-width:100%; }
+            th, td { padding:0.5rem 0.6rem; font-size:0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-paperclip"></i></div>
+                <h1>Ekstraktor <span>Link</span></h1>
+                <span class="badge-role">User</span>
+            </div>
+            <a href="admin_login.html" class="admin-link"><i class="fas fa-user-shield"></i> Admin</a>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Cari pekerjaan atau link..." />
+                <button id="btnSearchReset"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="badge-counter" id="counterBadge">0 item</span>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:12%;">Tanggal</th>
+                        <th style="width:35%;">Nama Pekerjaan</th>
+                        <th style="width:35%;">Link</th>
+                        <th style="width:18%; text-align:center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        <div class="footer-note">
+            <i class="fas fa-bolt"></i> Ekstraktor Link E-Kinerja &bull; Data lokal
+        </div>
+    </div>
+
+    <div id="toast" class="toast">✅ Disalin!</div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const searchInput = document.getElementById('searchInput');
+        const btnSearchReset = document.getElementById('btnSearchReset');
+        const counterBadge = document.getElementById('counterBadge');
+        const tableBody = document.getElementById('tableBody');
+        const toast = document.getElementById('toast');
+        let toastTimeout = null;
+
+        let dataItems = [];
+        let filteredItems = [];
+        let searchQuery = '';
+        const STORAGE_KEY_DATA = 'ekstraktor_data_ekinerja';
+
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY_DATA);
+            if (stored) {
+                try { dataItems = JSON.parse(stored); if (!Array.isArray(dataItems)) dataItems = []; } catch(_){ dataItems = []; }
+            } else {
+                dataItems = [];
+                // Data contoh pertama kali
+                const sample = [
+                    { tanggal: '2026-08-10', pekerjaan: 'Berita Acara Evaluasi Pelayanan', link: 'https://drive.google.com/file/d/1abc123/view' },
+                    { tanggal: '2026-08-12', pekerjaan: 'Daftar Hadir Rapat Koordinasi', link: 'https://drive.google.com/file/d/1xyz789/view' },
+                    { tanggal: '2026-08-13', pekerjaan: 'Dokumentasi Kegiatan Fasilitasi', link: 'https://drive.google.com/file/d/1def456/view' }
+                ];
+                localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(sample));
+                dataItems = sample;
+            }
+            applySearch();
+            renderTable();
+            updateCounter();
+        }
+
+        function applySearch() {
+            const q = searchQuery.trim().toLowerCase();
+            if (!q) filteredItems = [...dataItems];
+            else filteredItems = dataItems.filter(item =>
+                (item.pekerjaan || '').toLowerCase().includes(q) ||
+                (item.link || '').toLowerCase().includes(q)
+            );
+        }
+
+        function updateCounter() {
+            counterBadge.textContent = `${filteredItems.length} / ${dataItems.length} item`;
+        }
+
+        function renderTable() {
+            if (filteredItems.length === 0) {
+                tableBody.innerHTML = `<tr class="empty-row"><td colspan="4">📭 ${dataItems.length === 0 ? 'Belum ada data.' : 'Tidak ada data yang cocok.'}</td></tr>`;
+                return;
+            }
+            let html = '';
+            filteredItems.forEach(item => {
+                const tanggal = item.tanggal || '-';
+                let displayTanggal = tanggal;
+                if (tanggal && tanggal.length === 10) {
+                    const parts = tanggal.split('-');
+                    if (parts.length === 3) displayTanggal = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+                const pekerjaan = item.pekerjaan || '(tanpa judul)';
+                const link = item.link || '#';
+                html += `
+                    <tr>
+                        <td><strong>${displayTanggal}</strong></td>
+                        <td>${pekerjaan}</td>
+                        <td class="link-cell"><a href="${link}" target="_blank">${link.length > 55 ? link.substring(0,55)+'…' : link}</a></td>
+                        <td style="text-align:center;">
+                            <div class="action-cell">
+                                <button class="copy-btn" data-copy="${pekerjaan}"><i class="far fa-copy"></i> Nama</button>
+                                <button class="copy-btn" data-copy="${link}"><i class="fas fa-link"></i> Link</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = html;
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.getAttribute('data-copy');
+                    if (text) copyToClipboard(text, this);
+                });
+            });
+        }
+
+        function copyToClipboard(text, btn) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ "' + (text.length > 30 ? text.substring(0,30)+'…' : text) + '" disalin!');
+                if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('✅ Disalin! (fallback)');
+                if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
+            });
+        }
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function handleSearch() {
+            searchQuery = searchInput.value;
+            applySearch();
+            renderTable();
+            updateCounter();
+            btnSearchReset.style.display = searchQuery ? 'inline-block' : 'none';
+        }
+
+        function resetSearch() {
+            searchInput.value = '';
+            searchQuery = '';
+            applySearch();
+            renderTable();
+            updateCounter();
+            btnSearchReset.style.display = 'none';
+            searchInput.focus();
+        }
+
+        searchInput.addEventListener('input', handleSearch);
+        btnSearchReset.addEventListener('click', resetSearch);
+        btnSearchReset.style.display = 'none';
+
+        loadData();
+    })();
+</script>
+</body>
+</html>
