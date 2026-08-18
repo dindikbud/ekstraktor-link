@@ -117,6 +117,7 @@
             margin-top:1.2rem; text-align:right; font-size:0.75rem; color:#6f8f6f;
             border-top:1px solid rgba(201,168,76,0.15); padding-top:0.8rem;
         }
+        .loading { text-align:center; padding:2rem; color:var(--green-700); }
         @media (max-width:700px) {
             .app-container { padding:1rem; }
             .header { flex-direction:column; align-items:stretch; gap:0.8rem; }
@@ -147,7 +148,8 @@
         </div>
 
         <div class="table-wrapper">
-            <table>
+            <div id="loading" class="loading"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
+            <table id="dataTable" style="display:none;">
                 <thead>
                     <tr>
                         <th style="width:12%;">Tanggal</th>
@@ -160,64 +162,60 @@
             </table>
         </div>
         <div class="footer-note">
-            <i class="fas fa-bolt"></i> Ekstraktor Link E-Kinerja &bull; Data lokal
+            <i class="fas fa-bolt"></i> Ekstraktor Link E-Kinerja &bull; Data dari cloud
         </div>
     </div>
 
     <div id="toast" class="toast">✅ Disalin!</div>
 
     <script>
-    (function() {
-        'use strict';
+        // ===== KONFIGURASI GITHUB GIST =====
+        // GANTI DENGAN ID GIST ANDA
+        const GIST_ID = 'abc123def456'; // Ganti dengan ID Gist Anda
+        const GIST_RAW_URL = `https://gist.github.com/raw/${GIST_ID}`;
+        const GIST_API_URL = `https://api.github.com/gists/${GIST_ID}`;
 
+        // ===== DOM =====
         const searchInput = document.getElementById('searchInput');
         const btnSearchReset = document.getElementById('btnSearchReset');
         const counterBadge = document.getElementById('counterBadge');
         const tableBody = document.getElementById('tableBody');
+        const loading = document.getElementById('loading');
+        const dataTable = document.getElementById('dataTable');
         const toast = document.getElementById('toast');
         let toastTimeout = null;
 
         let dataItems = [];
         let filteredItems = [];
         let searchQuery = '';
-        const STORAGE_KEY_DATA = 'ekstraktor_data_ekinerja';
 
-        function loadData() {
-            const stored = localStorage.getItem(STORAGE_KEY_DATA);
-            if (stored) {
-                try { dataItems = JSON.parse(stored); if (!Array.isArray(dataItems)) dataItems = []; } catch(_){ dataItems = []; }
-            } else {
-                dataItems = [];
-                // Data contoh pertama kali
-                const sample = [
-                    { tanggal: '2026-08-10', pekerjaan: 'Berita Acara Evaluasi Pelayanan', link: 'https://drive.google.com/file/d/1abc123/view' },
-                    { tanggal: '2026-08-12', pekerjaan: 'Daftar Hadir Rapat Koordinasi', link: 'https://drive.google.com/file/d/1xyz789/view' },
-                    { tanggal: '2026-08-13', pekerjaan: 'Dokumentasi Kegiatan Fasilitasi', link: 'https://drive.google.com/file/d/1def456/view' }
-                ];
-                localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(sample));
-                dataItems = sample;
-            }
-            applySearch();
-            renderTable();
-            updateCounter();
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        function applySearch() {
-            const q = searchQuery.trim().toLowerCase();
-            if (!q) filteredItems = [...dataItems];
-            else filteredItems = dataItems.filter(item =>
-                (item.pekerjaan || '').toLowerCase().includes(q) ||
-                (item.link || '').toLowerCase().includes(q)
-            );
-        }
-
-        function updateCounter() {
-            counterBadge.textContent = `${filteredItems.length} / ${dataItems.length} item`;
+        function copyToClipboard(text, btn) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ "' + (text.length > 30 ? text.substring(0,30)+'…' : text) + '" disalin!');
+                if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('✅ Disalin! (fallback)');
+                if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
+            });
         }
 
         function renderTable() {
             if (filteredItems.length === 0) {
-                tableBody.innerHTML = `<tr class="empty-row"><td colspan="4">📭 ${dataItems.length === 0 ? 'Belum ada data.' : 'Tidak ada data yang cocok.'}</td></tr>`;
+                tableBody.innerHTML = `<tr class="empty-row"><td colspan="4">📭 ${dataItems.length === 0 ? 'Belum ada data dari admin.' : 'Tidak ada data yang cocok.'}</td></tr>`;
                 return;
             }
             let html = '';
@@ -253,35 +251,24 @@
             });
         }
 
-        function copyToClipboard(text, btn) {
-            if (!text) return;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ "' + (text.length > 30 ? text.substring(0,30)+'…' : text) + '" disalin!');
-                if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
-            }).catch(() => {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                showToast('✅ Disalin! (fallback)');
-                if (btn) { btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 800); }
-            });
+        function updateCounter() {
+            counterBadge.textContent = `${filteredItems.length} / ${dataItems.length} item`;
         }
 
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.classList.add('show');
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        function applySearch() {
+            const q = searchQuery.trim().toLowerCase();
+            if (!q) filteredItems = [...dataItems];
+            else filteredItems = dataItems.filter(item =>
+                (item.pekerjaan || '').toLowerCase().includes(q) ||
+                (item.link || '').toLowerCase().includes(q)
+            );
+            renderTable();
+            updateCounter();
         }
 
         function handleSearch() {
             searchQuery = searchInput.value;
             applySearch();
-            renderTable();
-            updateCounter();
             btnSearchReset.style.display = searchQuery ? 'inline-block' : 'none';
         }
 
@@ -289,8 +276,6 @@
             searchInput.value = '';
             searchQuery = '';
             applySearch();
-            renderTable();
-            updateCounter();
             btnSearchReset.style.display = 'none';
             searchInput.focus();
         }
@@ -299,8 +284,31 @@
         btnSearchReset.addEventListener('click', resetSearch);
         btnSearchReset.style.display = 'none';
 
-        loadData();
-    })();
-</script>
+        // ===== LOAD DATA DARI GITHUB GIST =====
+        async function loadDataFromGist() {
+            try {
+                loading.style.display = 'block';
+                dataTable.style.display = 'none';
+                const response = await fetch(GIST_RAW_URL);
+                if (!response.ok) throw new Error('Gagal mengambil data');
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    dataItems = data;
+                } else {
+                    dataItems = [];
+                }
+                loading.style.display = 'none';
+                dataTable.style.display = 'table';
+                applySearch();
+            } catch (error) {
+                loading.textContent = '❌ Gagal memuat data. Periksa ID Gist dan koneksi internet.';
+                console.error('Error:', error);
+            }
+        }
+
+        // Load data setiap 10 detik (auto refresh)
+        loadDataFromGist();
+        setInterval(loadDataFromGist, 10000);
+    </script>
 </body>
 </html>
